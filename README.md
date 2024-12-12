@@ -174,3 +174,4 @@ Les tests unitaires sont écrits avec Google Test pour valider les fonctionnalit
 - `my_malloc/my_free` est plus lent que `malloc/free` pour les petites tailles, car chaque appel à `my_malloc` utilise `mmap`, ce qui induit une surcharge.
 - Avec le recyclage des blocs, les performances s'améliorent considérablement, mais `malloc/free` reste plus rapide grâce à son utilisation de pools de mémoire et à son faible nombre d'appels systèmes.
 
+
