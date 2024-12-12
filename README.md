@@ -12,140 +12,189 @@ Ce projet est une implémentation d'un allocateur mémoire personnalisé en C++ 
 - **Compilateur** : GCC ou Clang (supportant C++11 minimum).
 - **Google Test** : Pour exécuter les tests unitaires.
 
+---
+
 ### **Installation de Google Test**
 
-Google Test est utilisé pour valider les fonctionnalités de `MyAllocator`. Voici comment installer et configurer Google Test :
+#### 1. Installation
 
-1. **Installez le package `libgtest-dev`** :
-   ```bash
-   sudo apt update
-   sudo apt install libgtest-dev
+Exécutez les commandes suivantes pour installer Google Test :
 
-    Compilez Google Test : Par défaut, libgtest-dev fournit uniquement les fichiers source, il faut donc les compiler.
+```bash
+sudo apt update
+sudo apt install libgtest-dev
+```
 
+#### 2. Compilation des sources
+
+Par défaut, le package `libgtest-dev` fournit uniquement les fichiers source. Vous devez les compiler manuellement :
+
+```bash
 cd /usr/src/gtest
 sudo cmake .
 sudo make
+```
 
-Installez les bibliothèques compilées : Copiez les fichiers .a (bibliothèques statiques) dans un répertoire accessible par le linker :
+#### 3. Installation des bibliothèques
 
-    sudo cp *.a /usr/lib
+Copiez les fichiers compilés dans un répertoire accessible par le linker :
 
-    Vérifiez que les fichiers suivants existent :
-        /usr/lib/libgtest.a
-        /usr/lib/libgtest_main.a
+```bash
+sudo cp *.a /usr/lib
+```
 
-Étapes pour Compiler le Programme Principal
+Vérifiez que les fichiers suivants existent :
 
-    Clonez le projet depuis le dépôt GitHub ou téléchargez les fichiers source :
+- `/usr/lib/libgtest.a`
+- `/usr/lib/libgtest_main.a`
 
+---
+
+### **Compilation et Exécution du Programme Principal**
+
+#### 1. Clonez le projet
+
+```bash
 git clone https://github.com/votre-repo/MyAllocator.git
 cd MyAllocator
+```
 
-Compilez le fichier principal :
+#### 2. Compilez le fichier principal
 
+```bash
 g++ main.cpp MyAllocator.cpp -o my_allocator -lpthread
+```
 
-Exécutez le programme principal :
+#### 3. Exécutez le programme principal
 
-    ./my_allocator
+```bash
+./my_allocator
+```
 
-Étapes pour Compiler et Exécuter les Tests Unitaires
+---
 
-    Compilez les tests avec Google Test :
+### **Compilation et Exécution des Tests Unitaires**
 
-g++ -std=c++11 MyAllocator.cpp tests.cpp main.cpp -o tests -lgtest -lgtest_main -lpthread
+#### 1. Compilation des tests
 
-Exécutez les tests unitaires :
+```bash
+g++ MyAllocator.cpp tests.cpp main.cpp -o tests -lgtest -lgtest_main -lpthread
+```
 
+#### 2. Exécution des tests
+
+```bash
 ./tests
+```
 
-Si tous les tests réussissent, vous verrez une sortie similaire :
+Si tous les tests réussissent, la sortie ressemblera à ceci :
 
-    [==========] Running 5 tests from 1 test suite.
-    [----------] Global test environment set-up.
-    [ RUN      ] MyAllocatorTest.Allocation
-    [       OK ] MyAllocatorTest.Allocation (0 ms)
-    [----------] 5 tests from MyAllocatorTest (5 ms total)
-    [==========] 5 tests ran. (5 ms total)
-    [  PASSED  ] 5 tests.
+```
+[==========] Running 5 tests from 1 test suite.
+[----------] Global test environment set-up.
+[ RUN      ] MyAllocatorTest.Allocation
+[       OK ] MyAllocatorTest.Allocation (0 ms)
+[----------] 5 tests from MyAllocatorTest (5 ms total)
+[==========] 5 tests ran. (5 ms total)
+[  PASSED  ] 5 tests.
+```
 
-Explication des Choix d'Implémentation
-Objectif du Projet
+---
 
-L'objectif de ce projet est de fournir une alternative à l'allocateur mémoire système standard (malloc/free) en implémentant un allocateur mémoire bas niveau personnalisé avec des optimisations spécifiques :
+## **Explication des Choix d'Implémentation**
 
-    Réduction de la fragmentation mémoire.
-    Recyclage des blocs libérés.
-    Utilisation efficace de la mémoire.
+### **Objectif du Projet**
 
-Principes d'Implémentation
+L'objectif de ce projet est de fournir une alternative à l'allocateur mémoire système standard (`malloc/free`) en implémentant un allocateur mémoire bas niveau personnalisé avec des optimisations spécifiques :
 
-    Segmentation en classes de tailles :
-        Les blocs sont alignés sur des puissances de 2 pour simplifier la gestion et améliorer les performances.
+- Réduction de la fragmentation mémoire.
+- Recyclage des blocs libérés.
+- Utilisation efficace de la mémoire.
 
-    Recyclage des blocs libérés :
-        Les blocs déjà libérés sont stockés dans une liste pour être réutilisés lors de futures allocations.
+### **Principes d'Implémentation**
 
-    Alignement :
-        Toutes les allocations sont alignées sur des frontières de mémoire pour garantir une meilleure compatibilité matérielle et des performances optimales.
+- **Segmentation en classes de tailles** : Les blocs sont alignés sur des puissances de 2 pour simplifier la gestion et améliorer les performances.
+- **Recyclage des blocs libérés** : Les blocs déjà libérés sont stockés dans une liste pour être réutilisés lors de futures allocations.
+- **Alignement** : Toutes les allocations sont alignées sur des frontières de mémoire pour garantir une meilleure compatibilité matérielle et des performances optimales.
+- \*\*Utilisation de ****`mmap`**** et \*\***`munmap`** : La mémoire est mappée dynamiquement à partir de l'espace virtuel du processus, évitant les dépendances avec le tas (heap).
+- **Support Multi-threading** : Un mutex global est utilisé pour protéger les listes de blocs libres dans un contexte multi-thread.
 
-    Utilisation de mmap et munmap :
-        La mémoire est mappée dynamiquement à partir de l'espace virtuel du processus, évitant les dépendances avec le tas (heap).
+---
 
-    Support Multi-threading :
-        Un mutex global est utilisé pour protéger les listes de blocs libres dans un contexte multi-thread.
-
-Tests Unitaires
+## **Tests Unitaires**
 
 Les tests unitaires sont écrits avec Google Test pour valider les fonctionnalités suivantes :
 
-    Allocation de mémoire :
-        Vérifie que les blocs alloués ne sont pas nuls.
-        Vérifie que les données écrites dans la mémoire allouée sont correctes.
+- **Allocation de mémoire** :
 
-    Recyclage des blocs :
-        Vérifie que les blocs libérés sont réutilisés correctement.
+  - Vérification que les blocs alloués ne sont pas nuls.
+  - Validation que les données écrites dans la mémoire allouée sont correctes.
 
-    Gestion de plusieurs allocations :
-        Vérifie que plusieurs blocs peuvent être alloués et libérés sans conflit.
+- **Recyclage des blocs** :
 
-    Alignement des blocs :
-        Vérifie que les blocs alloués sont alignés sur des frontières mémoire correctes.
+  - Vérification que les blocs libérés sont réutilisés correctement.
 
-    Fragmentation :
-        Vérifie que les blocs libérés sont réutilisés pour réduire la fragmentation externe.
+- **Gestion de plusieurs allocations** :
 
-Liste des Points d'Optimisations
-Fonctionnalités Implémentées
+  - Validation que plusieurs blocs peuvent être alloués et libérés sans conflit.
 
-    Alignement des blocs mémoire :
-        Les tailles d'allocations sont arrondies à la prochaine puissance de 2 pour simplifier la gestion et limiter la fragmentation interne.
+- **Alignement des blocs** :
 
-    Recyclage des blocs libérés :
-        Les blocs libérés sont réutilisés, ce qui réduit considérablement les appels coûteux à mmap et munmap.
+  - Vérification que les blocs alloués sont alignés sur des frontières mémoire correctes.
 
-    Liste des blocs libres :
-        Une gestion efficace des blocs libres est réalisée à l'aide d'une table de classes de tailles (puissances de 2).
+- **Fragmentation** :
 
-    Thread-safe :
-        L'utilisation de verrous (mutex) permet une utilisation sûre dans un environnement multi-thread.
+  - Validation que les blocs libérés sont réutilisés pour réduire la fragmentation externe.
 
-Résultats des Benchmarks
-Configuration du Test
+---
 
-    Nombre d'allocations/désallocations : 10,000.
-    Taille des allocations : 128 octets.
-    Système de test :
-        CPU : Intel Core i7.
-        RAM : 16 Go.
-        OS : Ubuntu 22.04.
+## **Liste des Points d'Optimisations**
 
-Résultats
-Méthode	Temps Total (ms)
-my_malloc/my_free	150 ms
-malloc/free	50 ms
-Analyse
+### **Fonctionnalités Implémentées**
 
-    my_malloc/my_free est plus lent que malloc/free pour les petites tailles, car chaque appel à my_malloc utilise mmap, ce qui induit une surcharge.
-    Avec le recyclage des blocs, les performances s'améliorent considérablement, mais malloc/free reste plus rapide grâce à son utilisation de pools de mémoire et à son faible nombre d'appels système.
+1. **Alignement des blocs mémoire** :
+
+   - Les tailles d'allocations sont arrondies à la prochaine puissance de 2 pour simplifier la gestion et limiter la fragmentation interne.
+
+2. **Recyclage des blocs libérés** :
+
+   - Les blocs libérés sont réutilisés, réduisant considérablement les appels coûteux à `mmap` et `munmap`.
+
+3. **Liste des blocs libres** :
+
+   - Une gestion efficace des blocs libres est réalisée à l'aide d'une table de classes de tailles (puissances de 2).
+
+4. **Thread-safe** :
+
+   - L'utilisation de verrous (mutex) permet une utilisation sûre dans un environnement multi-thread.
+
+---
+
+## **Résultats des Benchmarks**
+
+### **Configuration du Test**
+
+- **Nombre d'allocations/désallocations** : 10,000.
+- **Taille des allocations** : 128 octets.
+- **Système de test** :
+  - CPU : Intel Core i7.
+  - RAM : 16 Go.
+  - OS : Ubuntu 22.04.
+
+### **Résultats**
+
+| Méthode             | Temps Total (ms) |
+| ------------------- | ---------------- |
+| `my_malloc/my_free` | 150 ms           |
+| `malloc/free`       | 50 ms            |
+
+### **Analyse**
+
+- `my_malloc/my_free` est plus lent que `malloc/free` pour les petites tailles, car chaque appel à `my_malloc` utilise `mmap`, ce qui induit une surcharge.
+- Avec le recyclage des blocs, les performances s'améliorent considérablement, mais `malloc/free` reste plus rapide grâce à son utilisation de pools de mémoire et à son faible nombre d'appels sREECRIRE TOUS CETTE AFFICHAGE DANS UN FICHIER READ ME ET DONNE MOI CE READ ME
+
+
+
+
+
+-
