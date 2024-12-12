@@ -18,29 +18,23 @@ Ce projet est une implémentation d'un allocateur mémoire personnalisé en C++ 
 
 #### 1. Installation
 
-Exécutez les commandes suivantes pour installer Google Test :
-
 ```bash
-sudo apt update
-sudo apt install libgtest-dev
+1. sudo apt update
+2. sudo apt install libgtest-dev
 ```
 
 #### 2. Compilation des sources
 
-Par défaut, le package `libgtest-dev` fournit uniquement les fichiers source. Vous devez les compiler manuellement :
-
 ```bash
-cd /usr/src/gtest
-sudo cmake .
-sudo make
+1. cd /usr/src/gtest
+2. sudo cmake .
+3. sudo make
 ```
 
 #### 3. Installation des bibliothèques
 
-Copiez les fichiers compilés dans un répertoire accessible par le linker :
-
 ```bash
-sudo cp *.a /usr/lib
+1. sudo cp *.a /usr/lib
 ```
 
 Vérifiez que les fichiers suivants existent :
@@ -55,20 +49,20 @@ Vérifiez que les fichiers suivants existent :
 #### 1. Clonez le projet
 
 ```bash
-git clone https://github.com/votre-repo/MyAllocator.git
-cd MyAllocator
+1. git clone https://github.com/votre-repo/MyAllocator.git
+2. cd MyAllocator
 ```
 
 #### 2. Compilez le fichier principal
 
 ```bash
-g++ main.cpp MyAllocator.cpp -o my_allocator -lpthread
+1. g++ main.cpp MyAllocator.cpp -o my_allocator -lpthread
 ```
 
 #### 3. Exécutez le programme principal
 
 ```bash
-./my_allocator
+1. ./my_allocator
 ```
 
 ---
@@ -78,13 +72,13 @@ g++ main.cpp MyAllocator.cpp -o my_allocator -lpthread
 #### 1. Compilation des tests
 
 ```bash
-g++ MyAllocator.cpp tests.cpp main.cpp -o tests -lgtest -lgtest_main -lpthread
+1. g++ MyAllocator.cpp tests.cpp main.cpp -o tests -lgtest -lgtest_main -lpthread
 ```
 
 #### 2. Exécution des tests
 
 ```bash
-./tests
+1. ./tests
 ```
 
 Si tous les tests réussissent, la sortie ressemblera à ceci :
@@ -116,7 +110,7 @@ L'objectif de ce projet est de fournir une alternative à l'allocateur mémoire 
 - **Segmentation en classes de tailles** : Les blocs sont alignés sur des puissances de 2 pour simplifier la gestion et améliorer les performances.
 - **Recyclage des blocs libérés** : Les blocs déjà libérés sont stockés dans une liste pour être réutilisés lors de futures allocations.
 - **Alignement** : Toutes les allocations sont alignées sur des frontières de mémoire pour garantir une meilleure compatibilité matérielle et des performances optimales.
-- \*\*Utilisation de ****`mmap`**** et \*\***`munmap`** : La mémoire est mappée dynamiquement à partir de l'espace virtuel du processus, évitant les dépendances avec le tas (heap).
+- **Utilisation de `mmap` et `munmap`** : La mémoire est mappée dynamiquement à partir de l'espace virtuel du processus, évitant les dépendances avec le tas (heap).
 - **Support Multi-threading** : Un mutex global est utilisé pour protéger les listes de blocs libres dans un contexte multi-thread.
 
 ---
@@ -126,24 +120,15 @@ L'objectif de ce projet est de fournir une alternative à l'allocateur mémoire 
 Les tests unitaires sont écrits avec Google Test pour valider les fonctionnalités suivantes :
 
 - **Allocation de mémoire** :
-
   - Vérification que les blocs alloués ne sont pas nuls.
   - Validation que les données écrites dans la mémoire allouée sont correctes.
-
 - **Recyclage des blocs** :
-
   - Vérification que les blocs libérés sont réutilisés correctement.
-
 - **Gestion de plusieurs allocations** :
-
   - Validation que plusieurs blocs peuvent être alloués et libérés sans conflit.
-
 - **Alignement des blocs** :
-
   - Vérification que les blocs alloués sont alignés sur des frontières mémoire correctes.
-
 - **Fragmentation** :
-
   - Validation que les blocs libérés sont réutilisés pour réduire la fragmentation externe.
 
 ---
@@ -153,19 +138,15 @@ Les tests unitaires sont écrits avec Google Test pour valider les fonctionnalit
 ### **Fonctionnalités Implémentées**
 
 1. **Alignement des blocs mémoire** :
-
    - Les tailles d'allocations sont arrondies à la prochaine puissance de 2 pour simplifier la gestion et limiter la fragmentation interne.
 
 2. **Recyclage des blocs libérés** :
-
    - Les blocs libérés sont réutilisés, réduisant considérablement les appels coûteux à `mmap` et `munmap`.
 
 3. **Liste des blocs libres** :
-
    - Une gestion efficace des blocs libres est réalisée à l'aide d'une table de classes de tailles (puissances de 2).
 
 4. **Thread-safe** :
-
    - L'utilisation de verrous (mutex) permet une utilisation sûre dans un environnement multi-thread.
 
 ---
@@ -191,10 +172,5 @@ Les tests unitaires sont écrits avec Google Test pour valider les fonctionnalit
 ### **Analyse**
 
 - `my_malloc/my_free` est plus lent que `malloc/free` pour les petites tailles, car chaque appel à `my_malloc` utilise `mmap`, ce qui induit une surcharge.
-- Avec le recyclage des blocs, les performances s'améliorent considérablement, mais `malloc/free` reste plus rapide grâce à son utilisation de pools de mémoire et à son faible nombre d'appels sREECRIRE TOUS CETTE AFFICHAGE DANS UN FICHIER READ ME ET DONNE MOI CE READ ME
+- Avec le recyclage des blocs, les performances s'améliorent considérablement, mais `malloc/free` reste plus rapide grâce à son utilisation de pools de mémoire et à son faible nombre d'appels systèmes.
 
-
-
-
-
--
