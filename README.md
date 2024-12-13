@@ -49,33 +49,19 @@ Vérifiez que les fichiers suivants existent :
 #### 1. Clonez le projet
 
 ```bash
-1. git clone https://github.com/votre-repo/MyAllocator.git
-2. cd MyAllocator
+1. git clone git@github.com:rachamzn333/SYSTEME.git
+2. cd SYSTEME
 ```
-
-#### 2. Compilez le fichier principal
-
-```bash
-1. g++ main.cpp MyAllocator.cpp -o my_allocator -lpthread
-```
-
-#### 3. Exécutez le programme principal
-
-```bash
-1. ./my_allocator
-```
-
----
 
 ### **Compilation et Exécution des Tests Unitaires**
 
-#### 1. Compilation des tests
+#### 1. Compilation
 
 ```bash
 1. g++ MyAllocator.cpp tests.cpp main.cpp -o tests -lgtest -lgtest_main -lpthread
 ```
 
-#### 2. Exécution des tests
+#### 2. Exécution
 
 ```bash
 1. ./tests
@@ -99,7 +85,7 @@ Si tous les tests réussissent, la sortie ressemblera à ceci :
 
 ### **Objectif du Projet**
 
-L'objectif de ce projet est de fournir une alternative à l'allocateur mémoire système standard (`malloc/free`) en implémentant un allocateur mémoire bas niveau personnalisé avec des optimisations spécifiques :
+L'objectif de ce projet est de fournir une alternative à l'allocateur mémoire système standard (`malloc/free`) en implémentant un allocateur mémoire bas niveau personnalisé avec des optimisations spécifiques comme :
 
 - Réduction de la fragmentation mémoire.
 - Recyclage des blocs libérés.
@@ -137,17 +123,28 @@ Les tests unitaires sont écrits avec Google Test pour valider les fonctionnalit
 
 ### **Fonctionnalités Implémentées**
 
-1. **Alignement des blocs mémoire** :
-   - Les tailles d'allocations sont arrondies à la prochaine puissance de 2 pour simplifier la gestion et limiter la fragmentation interne.
+1. **Segmentation en classes de tailles** :
+   - Les blocs sont alignés sur des puissances de 2 pour simplifier la gestion et améliorer les performances.
 
-2. **Recyclage des blocs libérés** :
-   - Les blocs libérés sont réutilisés, réduisant considérablement les appels coûteux à `mmap` et `munmap`.
+2. **Recyclage des blocs libérés** : 
+   - Les blocs déjà libérés sont stockés dans des caches locaux par thread pour minimiser les verrous globaux.
 
-3. **Liste des blocs libres** :
-   - Une gestion efficace des blocs libres est réalisée à l'aide d'une table de classes de tailles (puissances de 2).
+3. **Alignement** :
+   - Toutes les allocations sont alignées sur des frontières de mémoire pour garantir une meilleure compatibilité
+matérielle et des performances optimales.
 
-4. **Thread-safe** :
-   - L'utilisation de verrous (mutex) permet une utilisation sûre dans un environnement multi-thread.
+   
+4. **Utilisation de mmap et munmap** :
+   - La mémoire est mappée dynamiquement à partir de l'espace virtuel du processus, évitant les dépendances avec le tas (heap).
+
+5. **Support Multi-threading avec Arènes** :
+   - Plusieurs arènes sont utilisées pour limiter la contention entre threads, chaque arène ayant son propre mutex.
+
+6. **Détection des fuites mémoire** :
+   - Un mécanisme de suivi des allocations détecte les blocs alloués mais non libérés à la fin de l'exécution.
+
+7. **Optimisation des métadonnées** :
+   - Les métadonnées pour chaque bloc sont compactes, contenant uniquement la taille, l'état du bloc, et un pointeur pour la gestion des listes.
 
 ---
 
@@ -157,21 +154,17 @@ Les tests unitaires sont écrits avec Google Test pour valider les fonctionnalit
 
 - **Nombre d'allocations/désallocations** : 10,000.
 - **Taille des allocations** : 128 octets.
-- **Système de test** :
-  - CPU : Intel Core i7.
-  - RAM : 16 Go.
-  - OS : Ubuntu 22.04.
+
 
 ### **Résultats**
 
 | Méthode             | Temps Total (ms) |
 | ------------------- | ---------------- |
-| `my_malloc/my_free` | 150 ms           |
-| `malloc/free`       | 50 ms            |
+| `my_malloc/my_free` | 70 ms           |
+| `malloc/free`       | 0 ms            |
 
 ### **Analyse**
 
 - `my_malloc/my_free` est plus lent que `malloc/free` pour les petites tailles, car chaque appel à `my_malloc` utilise `mmap`, ce qui induit une surcharge.
 - Avec le recyclage des blocs, les performances s'améliorent considérablement, mais `malloc/free` reste plus rapide grâce à son utilisation de pools de mémoire et à son faible nombre d'appels systèmes.
-
 
